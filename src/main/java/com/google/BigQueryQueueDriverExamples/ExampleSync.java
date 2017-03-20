@@ -8,8 +8,10 @@ import java.util.concurrent.ExecutionException;
 
 public class ExampleSync {
   public static void run() {
-    System.out.println("===============================");
-    System.out.println("======= SYNC Example ==========");
+    Helpers.Color.println(Helpers.Color.CYAN,
+        "===============================");
+    Helpers.Color.println(Helpers.Color.CYAN, 
+        "====== SYNC Example ==========");
     
     // Creating Client that uses projectId strong-moose and given service account
     BQQClient c = new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
@@ -21,9 +23,11 @@ public class ExampleSync {
     for (String sql : sqls) {
       try {
         QueryResult response = c.blockingQuery(sql, true);
-        System.out.println("DONE:");
-        System.out.println("\tSQL: " + sql.replace("\n", " "));
-        System.out.println("\tRows: " + response.getTotalRows());
+        Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
+        Helpers.Color.println(Helpers.Color.YELLOW,
+            "\tSQL: " + sql.replace("\n", " "));
+        Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + response.getTotalRows());
+
       } catch (BQQException | InterruptedException | ExecutionException e) {
         // TODO(bookman): Auto-generated catch block
         e.printStackTrace();

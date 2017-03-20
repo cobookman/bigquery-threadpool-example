@@ -15,8 +15,12 @@ import java.util.concurrent.Future;
 public class ExampleAsync {
 
   public static void run() {
-    System.out.println("===============================");
-    System.out.println("====== ASYNC Example ==========");
+    Helpers.Color.println(Helpers.Color.CYAN,
+        "===============================");
+    Helpers.Color.println(Helpers.Color.CYAN, 
+        "====== ASYNC Example ==========");
+
+
     
     // Creating Client that uses projectId strong-moose and given service account
     BQQClient c = new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
@@ -55,9 +59,10 @@ public class ExampleAsync {
           // Get Query Results & print
           try {
              QueryResult response = BQQClient.getQueryResultFuture(queryFuture);
-             System.out.println("DONE:");
-             System.out.println("\tSQL: " + entry.getKey().replace("\n", " "));
-             System.out.println("\tRows: " + response.getTotalRows());
+             Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
+             Helpers.Color.println(Helpers.Color.YELLOW,
+                 "\tSQL: " + entry.getKey().replace("\n", " "));
+             Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + response.getTotalRows());
              // Uncomment if you'd like the response to be printed
              // Helpers.printRows(response);
              
