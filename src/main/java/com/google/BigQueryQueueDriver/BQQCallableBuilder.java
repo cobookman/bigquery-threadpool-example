@@ -1,5 +1,7 @@
 package com.google.BigQueryQueueDriver;
 
+import com.google.cloud.bigquery.QueryParameterValue;
+
 public class BQQCallableBuilder {
   private String mProjectId;
   private String mQuery;
@@ -7,7 +9,6 @@ public class BQQCallableBuilder {
   private Boolean mUseLegacySQL = false;
 
   public BQQCallableBuilder() {
-    
   }
 
   public BQQCallableBuilder setProjectId(String projectId) {
@@ -18,6 +19,10 @@ public class BQQCallableBuilder {
   public BQQCallableBuilder setQuery(String query) {
     mQuery = query;
     return this;
+  }
+  
+  public BQQCallableBuilder setParameters(Map<String, QueryParameterValue> queryParams) {
+    mQueryParams = queryParams;
   }
   
   public BQQCallableBuilder setServiceAccountPath(String serviceAccountPath) {
