@@ -2,9 +2,12 @@ package com.google.BigQueryQueueDriverExamples;
 
 import com.google.BigQueryQueueDriver.BQQClient;
 import com.google.BigQueryQueueDriver.BQQException;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class ExampleSync {
   public static void run() {
@@ -22,7 +25,9 @@ public class ExampleSync {
     List<String> sqls = ExampleQueries.queries();
     for (String sql : sqls) {
       try {
-        QueryResult response = c.blockingQuery(sql, true);
+        Future<QueryResult> responseFuture = c.queueQuery(sql, true);
+        QueryResult response = BQQClient.getQueryResultFuture(responseFuture);
+
         Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
         Helpers.Color.println(Helpers.Color.YELLOW,
             "\tSQL: " + sql.replace("\n", " "));
@@ -32,6 +37,31 @@ public class ExampleSync {
         // TODO(bookman): Auto-generated catch block
         e.printStackTrace();
       }
+    }
+    
+    // User input based query!
+    String corpus = "corpus";
+    Integer minWordCount = 10;
+    Future<QueryResult> userInputQueryResponse = c.queueQuery(QueryRequest
+        .newBuilder(
+            "SELECT word, word_count\n"
+                + "FROM `bigquery-public-data.samples.shakespeare`\n"
+                + "WHERE corpus = @corpus\n"
+                + "AND word_count >= @min_word_count\n"
+                + "ORDER BY word_count DESC")
+        .addNamedParameter("corpus", QueryParameterValue.string(corpus))
+        .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
+        .setUseLegacySql(false)
+        .build());
+    
+    try {
+      QueryResult userInputQueryResult = BQQClient.getQueryResultFuture(userInputQueryResponse);
+      Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
+      Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + userInputQueryResult.getTotalRows());
+
+    } catch (InterruptedException | BQQException | ExecutionException e1) {
+      // TODO(bookman): Auto-generated catch block
+      e1.printStackTrace();
     }
     
     try {

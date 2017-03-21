@@ -1,15 +1,12 @@
 package com.google.BigQueryQueueDriver;
 
-import com.google.cloud.bigquery.QueryParameterValue;
-
-import java.util.Map;
+import com.google.BigQueryQueueDriver.BQQCallable;
+import com.google.cloud.bigquery.QueryRequest;
 
 public class BQQCallableBuilder {
   private String mProjectId;
-  private String mQuery;
   private String mServiceAccountPath = "";
-  private Boolean mUseLegacySQL = false;
-  private Map<String, QueryParameterValue> mQueryParams;
+  private QueryRequest mQueryRequest;
     
   public BQQCallableBuilder() {
   }
@@ -19,35 +16,27 @@ public class BQQCallableBuilder {
     return this;
   }
   
-  public BQQCallableBuilder setQuery(String query) {
-    mQuery = query;
+  public BQQCallableBuilder setQueryRequest(QueryRequest queryRequest) {
+    mQueryRequest = queryRequest;
     return this;
   }
   
-  public BQQCallableBuilder setParameters(Map<String, QueryParameterValue> queryParams) {
-    mQueryParams = queryParams;
-  }
   
   public BQQCallableBuilder setServiceAccountPath(String serviceAccountPath) {
     mServiceAccountPath = serviceAccountPath;
     return this;
   }
   
-  public BQQCallableBuilder setUseLegacySQL(boolean useLegacySQL) {
-    mUseLegacySQL = useLegacySQL;
-    return this;
-  }
-  
   public BQQCallable build() {
-    if (mQuery.isEmpty()) {
-      throw new IllegalArgumentException("Need to specify a SQL Query");
+    if (mQueryRequest == null) {
+      throw new IllegalArgumentException("Need to specify a queryRequest");
     }
-    
-    if (!mServiceAccountPath.isEmpty() && mProjectId.isEmpty()) {
+
+    boolean usingServiceAccount = mServiceAccountPath != null && !mServiceAccountPath.isEmpty();
+    if (usingServiceAccount && mProjectId.isEmpty()) {
       throw new IllegalArgumentException("Need a project ID Specified if using service account");
     }
     
-    return new BQQCallable(mProjectId, mQuery, mQueryParams,
-        mServiceAccountPath, mUseLegacySQL);
+    return new BQQCallable(mProjectId, mServiceAccountPath, mQueryRequest);
   }
 }

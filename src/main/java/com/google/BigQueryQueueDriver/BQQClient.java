@@ -1,5 +1,6 @@
 package com.google.BigQueryQueueDriver;
 
+import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -16,8 +17,7 @@ public class BQQClient {
   /**
    * Instantiates a Big Query Queue using default credentials
    */
-  public BQQClient() {
-  }
+  public BQQClient() {}
   
   /**
    * Instantiates a Big Query Queue w/auth by Service Account
@@ -34,16 +34,30 @@ public class BQQClient {
    * @param numThreads number of worker threads / max concurrent queries to handle requests 
    */
   public void startup(int numThreads) {    
-    // Build a fixed number of thread pool
+    // FIFO Queue
     BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
+    
+    // ThreadPool of numThread workers which kills all threads that have done no work in 1000ms
     mPool = new ThreadPoolExecutor(numThreads, numThreads,
         1000, TimeUnit.MILLISECONDS, blockingQueue);
-
-//    mPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads);
   }
   
   public Integer getNumJobs() {
     return mPool.getQueue().size();
+  }
+  
+  /**
+   * Queues up a QueryRequest to be executed on one of the thread pool threads.
+   * @param queryRequest a QueryRequest to be queued up
+   * @return a future with query results
+   */
+  public Future<QueryResult> queueQuery(QueryRequest queryRequest) {
+    BQQCallable c = new BQQCallableBuilder()
+        .setProjectId(mProjectId)
+        .setServiceAccountPath(mServiceAccountPath)
+        .setQueryRequest(queryRequest)
+        .build();
+    return mPool.submit(c);
   }
   
   /**
@@ -53,13 +67,11 @@ public class BQQClient {
    * @return a future with the query results
    */
   public Future<QueryResult> queueQuery(String query, boolean useLegacySql) {
-    BQQCallable c = new BQQCallableBuilder()
-        .setProjectId(mProjectId)
-        .setServiceAccountPath(mServiceAccountPath)
-        .setUseLegacySQL(useLegacySql)
-        .setQuery(query)
+    QueryRequest queryRequest = QueryRequest.newBuilder(query)
+        .setUseLegacySql(useLegacySql)
         .build();
-    return mPool.submit(c);
+
+    return queueQuery(queryRequest);
   }
   
   /**

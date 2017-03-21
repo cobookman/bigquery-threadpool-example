@@ -12,27 +12,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class BQQCallable implements Callable<QueryResult> {
   private String mProjectId;
-  private String mQuery;
   private String mServiceAccountPath = "";
-  private Boolean mUseLegacySQL;
+  private QueryRequest mQueryRequest;
 
+    
   /**
    * Generates a new BQQCallable instance
-   * @param projectId
-   * @param query
-   * @param serviceAccountPath
-   * @param useLegacySQL
+   * If serviceAccountPath is an empty string / null, then default credentials used instead.
+   * @param projectId project that the bq client bills / auths against
+   * @param serviceAccountPath absolute path to a service account, or null/"" for default creds.
+   * @param queryRequest the Query that needs to be run
    */
-  public BQQCallable(String projectId, String query,
-      String serviceAccountPath, Boolean useLegacySQL) {
+  public BQQCallable(String projectId, String serviceAccountPath, 
+      QueryRequest queryRequest) {
     mProjectId = projectId;
-    mQuery = query;
     mServiceAccountPath = serviceAccountPath;
-    mUseLegacySQL = useLegacySQL;
+    mQueryRequest = queryRequest;
   }
   
   /**
@@ -42,7 +40,7 @@ public class BQQCallable implements Callable<QueryResult> {
    * @throws IOException if failed to read service account
    */
   private BigQuery buildBQClient() throws FileNotFoundException, IOException {
-    if (mServiceAccountPath.isEmpty()) {
+    if (mServiceAccountPath == null || mServiceAccountPath.isEmpty()) {
       return BigQueryOptions.getDefaultInstance().getService();
     } else {
       return BigQueryOptions.newBuilder()
@@ -66,11 +64,7 @@ public class BQQCallable implements Callable<QueryResult> {
   public QueryResult call() throws BQQException, InterruptedException, FileNotFoundException, IOException {
     BigQuery bigquery = buildBQClient();
 
-    QueryRequest queryRequest = QueryRequest
-        .newBuilder(mQuery)
-        .setUseLegacySql(mUseLegacySQL).build();
-    
-    QueryResponse response = bigquery.query(queryRequest);
+    QueryResponse response = bigquery.query(mQueryRequest);
 
     while (!response.jobCompleted()) {
       Thread.sleep(500L);
