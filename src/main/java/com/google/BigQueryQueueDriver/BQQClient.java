@@ -101,21 +101,6 @@ public class BQQClient {
   }
   
   /**
-   * Queues up a query, then blocks until results are in
-   * @param sql SQL statement to execute
-   * @param useLegacySql if the query is using Legacy SQL or not
-   * @return the query results A query result
-   * @throws BQQException  the list of BigQuery errors
-   * @throws InterruptedException if query is interrupted
-   * @throws ExecutionException if the exception thrown in worker thread is unknown
-   */
-  public QueryResult blockingQuery(String sql, boolean useLegacySql) throws BQQException, InterruptedException, ExecutionException {
-    Future<QueryResult> queryResultFuture = queueQuery(sql, useLegacySql);
-    return getQueryResultFuture(queryResultFuture);
-  }
-  
-  
-  /**
    * Tears down the underlying thread pool. With a default 100ms termination timeout.
    * @throws Exception error that occurs when tearing down thread pool.
    */
