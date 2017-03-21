@@ -9,7 +9,7 @@ public class BQQCallableBuilder {
   private String mQuery;
   private String mServiceAccountPath = "";
   private Boolean mUseLegacySQL = false;
-  private Map<String, QueryParameterValue>
+  private Map<String, QueryParameterValue> mQueryParams;
     
   public BQQCallableBuilder() {
   }
