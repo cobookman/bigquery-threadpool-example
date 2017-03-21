@@ -17,11 +17,7 @@ import java.util.concurrent.Future;
 public class ExampleAsync {
 
   public static void run() {
-    Helpers.Color.println(Helpers.Color.CYAN,
-        "===============================");
-    Helpers.Color.println(Helpers.Color.CYAN, 
-        "====== ASYNC Example ==========");
-
+    System.out.println("Asynchronous Query Execution");
 
     
     // Creating Client that uses projectId strong-moose and given service account
@@ -56,7 +52,7 @@ public class ExampleAsync {
     
     // Block until all queries are done, and output info once a query has results
     while (!map.isEmpty()) {
-      System.out.println("Number of queued up jobs: " + c.getNumJobs());
+      System.out.println("\tNumber of queued up jobs: " + c.getNumJobs());
       try {
         Thread.sleep(500);
       } catch (InterruptedException e1) {
@@ -77,19 +73,14 @@ public class ExampleAsync {
            
           // Get Query Results & print
           try {
-             QueryResult response = BQQClient.getQueryResultFuture(queryFuture);
-             Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
-             Helpers.Color.println(Helpers.Color.YELLOW,
-                 "\tSQL: " + entry.getKey().replace("\n", " "));
-             Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + response.getTotalRows());
-             // Uncomment if you'd like the response to be printed
-             // Helpers.printRows(response);
-             
+             QueryResult response = BQQClient.getQueryResult(queryFuture);
+             System.out.println("\tQuery Done");
+             System.out.println("\t\tSql: " + entry.getKey().replace("\n", ""));
+             System.out.println("\t\tRows: " + response.getTotalRows());
            } catch (BQQException e) {
              for (BigQueryError bqerr : e.getBQErrors()) {
                System.err.println(bqerr.getMessage());
-             }
-             
+             }             
            } catch (InterruptedException e) {
              System.out.println("Interrupted");
              Thread.currentThread().interrupt(); // ignore / reset

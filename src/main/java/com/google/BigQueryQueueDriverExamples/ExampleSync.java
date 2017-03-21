@@ -2,40 +2,47 @@ package com.google.BigQueryQueueDriverExamples;
 
 import com.google.BigQueryQueueDriver.BQQClient;
 import com.google.BigQueryQueueDriver.BQQException;
+import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class ExampleSync {
   public static void run() {
-    Helpers.Color.println(Helpers.Color.CYAN,
-        "===============================");
-    Helpers.Color.println(Helpers.Color.CYAN, 
-        "====== SYNC Example ==========");
+    System.out.println("Synchronous Query Execution");
     
     // Creating Client that uses projectId strong-moose and given service account
     BQQClient c = new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
     
-    // only allow at max 2 concurrent queries
+    // Startup 2 worker threads to handle bq queries, allowing only
+    // 2 concurrent queries at any time.
     c.startup(2);
-    
+
+    // Run only 1 query at a time, and block thread until results are in
     List<String> sqls = ExampleQueries.queries();
     for (String sql : sqls) {
+      Future<QueryResult> queryFuture = c.queueQuery(sql, true);
       try {
-        Future<QueryResult> responseFuture = c.queueQuery(sql, true);
-        QueryResult response = BQQClient.getQueryResultFuture(responseFuture);
+        QueryResult response = BQQClient.getQueryResult(queryFuture);
+        System.out.println("\tQuery Done:");
+        System.out.println("\t\tSql: " + sql.replace("\n", ""));
+        System.out.println("\t\tRows: " + response.getTotalRows());
 
-        Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
-        Helpers.Color.println(Helpers.Color.YELLOW,
-            "\tSQL: " + sql.replace("\n", " "));
-        Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + response.getTotalRows());
-
-      } catch (BQQException | InterruptedException | ExecutionException e) {
-        // TODO(bookman): Auto-generated catch block
-        e.printStackTrace();
+      } catch (BQQException e) {
+        for (BigQueryError bqerr : e.getBQErrors()) {
+          System.err.println(bqerr.getMessage());
+        }             
+      } catch (InterruptedException e) {
+        System.out.println("Interrupted");
+        Thread.currentThread().interrupt(); // ignore / reset
+        
+      } catch (ExecutionException e) {
+        // unknown exception, simply printing it as a stacktrace for logging
+        e.printStackTrace(); 
       }
     }
     
@@ -58,22 +65,22 @@ public class ExampleSync {
     
     try {
       // Block and wait until future resolves
-      QueryResult userInputQueryResult = BQQClient.getQueryResultFuture(userInputQueryResponse);
+      QueryResult userInputQueryResult = BQQClient.getQueryResult(userInputQueryResponse);
       
-      // print results
-      Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
-      Helpers.Color.println(Helpers.Color.YELLOW, "\tSQL: " + parameterizedSql);
-      Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + userInputQueryResult.getTotalRows());
+      System.out.println("\tQuery Done:");
+      System.out.println("\t\tSql: " + parameterizedSql.replace("\n", ""));
+      System.out.println("\t\tRows: " + userInputQueryResult.getTotalRows());
 
-    } catch (InterruptedException | BQQException | ExecutionException e1) {
-      // TODO(bookman): Auto-generated catch block
-      e1.printStackTrace();
+    } catch (InterruptedException | BQQException | ExecutionException e) {
+      // handle exception in running query
+      e.printStackTrace();
     }
     
+    // Teardown BQ threadpool
     try {
       c.teardown();
     } catch (Exception e) {
-      // TODO(bookman): Auto-generated catch block
+      // Handle exception in tearing down threadpool
       e.printStackTrace();
     }
   }

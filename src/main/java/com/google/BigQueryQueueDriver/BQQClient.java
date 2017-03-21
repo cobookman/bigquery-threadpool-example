@@ -82,7 +82,7 @@ public class BQQClient {
    * @throws BQQException if BigQuery had an error
    * @throws ExecutionException if the exception thrown by worker thread is of unknown type
    */
-  public static QueryResult getQueryResultFuture(Future<QueryResult> queryResultFuture) throws InterruptedException, BQQException, ExecutionException {
+  public static QueryResult getQueryResult(Future<QueryResult> queryResultFuture) throws InterruptedException, BQQException, ExecutionException {
     QueryResult result = null;
     try {
       result = queryResultFuture.get();
