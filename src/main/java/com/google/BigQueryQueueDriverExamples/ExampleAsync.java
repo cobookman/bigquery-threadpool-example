@@ -3,6 +3,8 @@ package com.google.BigQueryQueueDriverExamples;
 import com.google.BigQueryQueueDriver.BQQClient;
 import com.google.BigQueryQueueDriver.BQQException;
 import com.google.cloud.bigquery.BigQueryError;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,6 +36,23 @@ public class ExampleAsync {
     for (String sql : sqls) {
       map.put(sql, c.queueQuery(sql, true));
     }
+    
+    // Queue up parameterized query
+    int minWordCount = 10;
+    String corpus = "tempest";
+    String parameterizedSql = "SELECT word, word_count\n"
+        + "FROM `bigquery-public-data.samples.shakespeare`\n"
+        + "WHERE corpus = @corpus\n"
+        + "AND word_count >= @min_word_count\n"
+        + "ORDER BY word_count DESC";
+    
+    QueryRequest parameterizedQueryRequest = QueryRequest
+        .newBuilder(parameterizedSql)
+        .addNamedParameter("corpus", QueryParameterValue.string(corpus))
+        .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
+        .setUseLegacySql(false)
+        .build();
+    map.put(parameterizedSql, c.queueQuery(parameterizedQueryRequest));
     
     // Block until all queries are done, and output info once a query has results
     while (!map.isEmpty()) {

@@ -40,23 +40,29 @@ public class ExampleSync {
     }
     
     // User input based query!
-    String corpus = "corpus";
-    Integer minWordCount = 10;
-    Future<QueryResult> userInputQueryResponse = c.queueQuery(QueryRequest
-        .newBuilder(
-            "SELECT word, word_count\n"
-                + "FROM `bigquery-public-data.samples.shakespeare`\n"
-                + "WHERE corpus = @corpus\n"
-                + "AND word_count >= @min_word_count\n"
-                + "ORDER BY word_count DESC")
+    int minWordCount = 10;
+    String corpus = "tempest";
+    String parameterizedSql = "SELECT word, word_count\n"
+        + "FROM `bigquery-public-data.samples.shakespeare`\n"
+        + "WHERE corpus = @corpus\n"
+        + "AND word_count >= @min_word_count\n"
+        + "ORDER BY word_count DESC";
+    
+    QueryRequest parameterizedQueryRequest = QueryRequest
+        .newBuilder(parameterizedSql)
         .addNamedParameter("corpus", QueryParameterValue.string(corpus))
         .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
         .setUseLegacySql(false)
-        .build());
+        .build();
+    Future<QueryResult> userInputQueryResponse = c.queueQuery(parameterizedQueryRequest);
     
     try {
+      // Block and wait until future resolves
       QueryResult userInputQueryResult = BQQClient.getQueryResultFuture(userInputQueryResponse);
+      
+      // print results
       Helpers.Color.println(Helpers.Color.GREEN, "DONE:");
+      Helpers.Color.println(Helpers.Color.YELLOW, "\tSQL: " + parameterizedSql);
       Helpers.Color.println(Helpers.Color.YELLOW, "\tRows: " + userInputQueryResult.getTotalRows());
 
     } catch (InterruptedException | BQQException | ExecutionException e1) {
