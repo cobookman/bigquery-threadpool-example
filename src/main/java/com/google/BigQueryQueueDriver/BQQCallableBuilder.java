@@ -2,12 +2,15 @@ package com.google.BigQueryQueueDriver;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 
+import java.util.Map;
+
 public class BQQCallableBuilder {
   private String mProjectId;
   private String mQuery;
   private String mServiceAccountPath = "";
   private Boolean mUseLegacySQL = false;
-
+  private Map<String, QueryParameterValue>
+    
   public BQQCallableBuilder() {
   }
 
@@ -44,7 +47,7 @@ public class BQQCallableBuilder {
       throw new IllegalArgumentException("Need a project ID Specified if using service account");
     }
     
-    return new BQQCallable(mProjectId, mQuery,
+    return new BQQCallable(mProjectId, mQuery, mQueryParams,
         mServiceAccountPath, mUseLegacySQL);
   }
 }
