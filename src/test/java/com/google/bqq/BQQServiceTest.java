@@ -11,18 +11,18 @@ public class BQQServiceTest {
 
   @Test
   public void testBuildBQClient_usingdefault() throws FileNotFoundException, IOException {
-    BQQService.buildClient(null, null);
+    BQQServiceFactory.buildClient(null, null);
   }
   
   @Test
   public void testBuildBQClient_ThrowsError_NoServiceAccount() throws FileNotFoundException, IOException {
     thrown.expect(FileNotFoundException.class);
-    BQQService.buildClient("some-project", "some-non-exsistent-file.json");
+    BQQServiceFactory.buildClient("some-project", "some-non-exsistent-file.json");
   }
   
   @Test
   public void testBuildBQClient_ThrowsError_NoProjectID() throws FileNotFoundException, IOException {
     thrown.expect(IllegalArgumentException.class);
-    BQQService.buildClient("some-project", "");
+    BQQServiceFactory.buildClient("some-project", "");
   }
 }

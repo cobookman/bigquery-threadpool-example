@@ -11,7 +11,7 @@
 apply plugin: 'java'
 
 apply plugin:'application'
-mainClassName = "com.google.BigQueryQueueDriverExamples.Examples"
+mainClassName = "com.google.bqqexamples.Examples"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
