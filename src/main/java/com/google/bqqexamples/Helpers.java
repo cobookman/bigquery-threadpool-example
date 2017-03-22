@@ -1,11 +1,15 @@
 package com.google.bqqexamples;
 
+import com.google.bqq.BQQException;
+import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import java.util.Iterator;
 import java.util.List;
 
 public class Helpers {
+  public static final String ANSI_RESET = "\u001B[0m";
+  public static final String ANSI_RED = "\u001B[31m";
 
   public static void printRows(QueryResult response) {
     Iterator<List<FieldValue>> rowIterator = response.iterateAll();
@@ -13,6 +17,13 @@ public class Helpers {
     int maxRows = 100;
     while (rowIterator.hasNext() && maxRows-- > 0) {
       System.out.println(rowIterator.next());
+    }
+  }
+  
+  public static void printErrorCodes(BQQException errs) {
+    for (BigQueryError be : errs.getBQErrors()) {
+      System.out.println(ANSI_RED + "\t\tError Code: " + be.getReason() + ANSI_RESET);
+      System.out.println(ANSI_RED + "\t\thttps://cloud.google.com/bigquery/troubleshooting-errors" + ANSI_RESET);
     }
   }
 }

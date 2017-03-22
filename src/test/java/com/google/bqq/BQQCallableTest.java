@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -23,7 +24,8 @@ public class BQQCallableTest {
           .build())
       .build();
     QueryResult r = c.call();
-    r.getTotalRows();
+    
+    Assert.assertTrue("There are rows returned from query", r.getTotalRows() > 0);
   }
   
   

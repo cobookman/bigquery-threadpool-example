@@ -34,16 +34,16 @@ public class ExampleSync {
       Future<QueryResult> queryFuture = c.queueQuery(sql, true);
       try {
         QueryResult response = BQQClient.getQueryResult(queryFuture);
+        assert(response.getTotalRows() > 0);
+
         System.out.println("\tQuery Done:");
         System.out.println("\t\tSql: " + sql.replace("\n", ""));
         System.out.println("\t\tRows: " + response.getTotalRows());
 
       } catch (BQQException e) {
-        for (BigQueryError bqerr : e.getBQErrors()) {
-          System.err.println(bqerr.getMessage());
-        }             
+        Helpers.printErrorCodes(e);
+
       } catch (InterruptedException e) {
-        System.out.println("Interrupted");
         Thread.currentThread().interrupt(); // ignore / reset
         
       } catch (ExecutionException e) {
@@ -72,12 +72,16 @@ public class ExampleSync {
     try {
       // Block and wait until future resolves
       QueryResult userInputQueryResult = BQQClient.getQueryResult(userInputQueryResponse);
-      
+      assert(userInputQueryResult.getTotalRows() > 0);
+
       System.out.println("\tQuery Done:");
       System.out.println("\t\tSql: " + parameterizedSql.replace("\n", ""));
       System.out.println("\t\tRows: " + userInputQueryResult.getTotalRows());
 
-    } catch (InterruptedException | BQQException | ExecutionException e) {
+    } catch (BQQException e) {
+      Helpers.printErrorCodes(e);
+      
+    } catch (InterruptedException | ExecutionException e) {
       // handle exception in running query
       e.printStackTrace();
     }

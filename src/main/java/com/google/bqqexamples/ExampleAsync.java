@@ -63,8 +63,7 @@ public class ExampleAsync {
       try {
         Thread.sleep(500);
       } catch (InterruptedException e1) {
-        // TODO(bookman): Auto-generated catch block
-        e1.printStackTrace();
+        Thread.currentThread().interrupt(); // ignore / reset
       }
       
       // See what queries have finished
@@ -81,15 +80,14 @@ public class ExampleAsync {
           // Get Query Results & print
           try {
              QueryResult response = BQQClient.getQueryResult(queryFuture);
+             assert(response.getTotalRows() > 0);
              System.out.println("\tQuery Done");
              System.out.println("\t\tSql: " + entry.getKey().replace("\n", ""));
              System.out.println("\t\tRows: " + response.getTotalRows());
            } catch (BQQException e) {
-             for (BigQueryError bqerr : e.getBQErrors()) {
-               System.err.println(bqerr.getMessage());
-             }             
+             Helpers.printErrorCodes(e);
+
            } catch (InterruptedException e) {
-             System.out.println("Interrupted");
              Thread.currentThread().interrupt(); // ignore / reset
              
            } catch (ExecutionException e) {
@@ -98,7 +96,8 @@ public class ExampleAsync {
            }
          }
        }
-     }
+    }
+    
     try {
       c.shutdown();
     } catch(Exception e) {
