@@ -1,4 +1,4 @@
-package com.google.BigQueryQueueDriverExamples;
+package com.google.bqqexamples;
 
 import java.util.ArrayList;
 import java.util.List;

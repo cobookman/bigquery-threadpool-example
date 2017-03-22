@@ -1,7 +1,10 @@
-package com.google.BigQueryQueueDriver;
+package com.google.bqq;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -9,6 +12,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A class to schedule BQQCallable tasks across n threads. It handles the
+ * entire thread pool life-cycle from startup, scheduling, and shutdown.
+ */
 public class BQQClient {  
   private String mProjectId;
   private String mServiceAccountPath;
@@ -25,6 +32,14 @@ public class BQQClient {
    * @param serviceAccountPath path to a service account
    */
   public BQQClient(String projectId, String serviceAccountPath) {
+    if (projectId == null || projectId.isEmpty()) {
+      throw new IllegalArgumentException("projectId is null / empty string");
+    }
+    
+    if (serviceAccountPath == null || serviceAccountPath.isEmpty()) {
+      throw new IllegalArgumentException("projectId is null / empty string");
+    }
+    
     mProjectId = projectId;
     mServiceAccountPath = serviceAccountPath;
   }
@@ -32,8 +47,13 @@ public class BQQClient {
   /**
    * Starts up a thread pool to handle BQ SQL requests.
    * @param numThreads number of worker threads / max concurrent queries to handle requests 
+   * @throws IOException thrown if failed to read service account
+   * @throws FileNotFoundException thrown if no service account found in path specified 
    */
-  public void startup(int numThreads) {    
+  public void startup(int numThreads) throws FileNotFoundException, IOException {   
+    // Sanity check that our credentials are valid by creating a BQ client connection
+    BQQServiceFactory.buildClient(mProjectId, mServiceAccountPath);
+
     // FIFO Queue
     BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
     
@@ -82,17 +102,21 @@ public class BQQClient {
    * @throws BQQException if BigQuery had an error
    * @throws ExecutionException if the exception thrown by worker thread is of unknown type
    */
-  public static QueryResult getQueryResult(Future<QueryResult> queryResultFuture) throws InterruptedException, BQQException, ExecutionException {
+  public static QueryResult getQueryResult(Future<QueryResult> queryResultFuture) 
+      throws InterruptedException, BQQException, ExecutionException {
+
     QueryResult result = null;
     try {
       result = queryResultFuture.get();
-      
+
     } catch (ExecutionException e) { 
       
       Throwable t = e.getCause();
       if (t instanceof BQQException) {
         throw ((BQQException) t);
         
+      } else if (t instanceof BigQueryException) {
+        throw new BQQException((BigQueryException) t);
       } else {
         throw e;
       }
@@ -104,8 +128,8 @@ public class BQQClient {
    * Tears down the underlying thread pool. With a default 100ms termination timeout.
    * @throws Exception error that occurs when tearing down thread pool.
    */
-  public void teardown() throws Exception {
-    teardown(1000);
+  public void shutdown() throws Exception {
+    shutdown(1000);
   }
   
   /**
@@ -113,7 +137,7 @@ public class BQQClient {
    * @param terminationTimeout time to wait for thread pool to turn before timing out
    * @throws Exception error that occurs when tearing down thread pool.
    */
-  public void teardown(int terminationTimeout) throws Exception {
+  public void shutdown(int terminationTimeout) throws Exception {
     // gracefully shutdown thread pool
     mPool.shutdown();
     

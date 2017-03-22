@@ -1,15 +1,16 @@
-package com.google.BigQueryQueueDriver;
+package com.google.bqq;
 
-import com.google.BigQueryQueueDriver.BQQCallable;
 import com.google.cloud.bigquery.QueryRequest;
 
+/**
+ * Builder for BQQCallables
+ */
 public class BQQCallableBuilder {
   private String mProjectId;
   private String mServiceAccountPath = "";
   private QueryRequest mQueryRequest;
     
-  public BQQCallableBuilder() {
-  }
+  public BQQCallableBuilder() {}
 
   public BQQCallableBuilder setProjectId(String projectId) {
     mProjectId = projectId;

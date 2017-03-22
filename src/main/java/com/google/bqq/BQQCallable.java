@@ -1,18 +1,19 @@
-package com.google.BigQueryQueueDriver;
+package com.google.bqq;
 
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryError;
-import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * Immutable Blocking BigQuery task to execute.
+ */
 public class BQQCallable implements Callable<QueryResult> {
   private String mProjectId;
   private String mServiceAccountPath = "";
@@ -34,26 +35,6 @@ public class BQQCallable implements Callable<QueryResult> {
   }
   
   /**
-   * Builds a BQ Client either from ServiceAccount or using default credentials
-   * @return a BQ client
-   * @throws FileNotFoundException if no service account found in path
-   * @throws IOException if failed to read service account
-   */
-  private BigQuery buildBQClient() throws FileNotFoundException, IOException {
-    if (mServiceAccountPath == null || mServiceAccountPath.isEmpty()) {
-      return BigQueryOptions.getDefaultInstance().getService();
-    } else {
-      return BigQueryOptions.newBuilder()
-          .setProjectId(mProjectId)
-          .setCredentials(
-              ServiceAccountCredentials.fromStream(new FileInputStream(
-                  mServiceAccountPath)))
-          .build()
-          .getService();
-    }
-  }
-  
-  /**
    * Executes the instance's BigQuery SQL Query.
    * @throws BQQException query fails
    * @throws InterruptedException thread pool closed / killed before query finishes
@@ -61,14 +42,24 @@ public class BQQCallable implements Callable<QueryResult> {
    * @throws FileNotFoundException  if failed to read Service Account
    */
   @Override
-  public QueryResult call() throws BQQException, InterruptedException, FileNotFoundException, IOException {
-    BigQuery bigquery = buildBQClient();
-
-    QueryResponse response = bigquery.query(mQueryRequest);
-
+  public QueryResult call() throws BQQException, InterruptedException,
+    FileNotFoundException, IOException {
+    
+    BigQuery bigquery = BQQServiceFactory.buildClient(mProjectId, mServiceAccountPath);
+    QueryResponse response;
+    try {
+      response = bigquery.query(mQueryRequest);
+    } catch (BigQueryException e) {
+      throw new BQQException("Query failed to be sent: " + mQueryRequest, e);
+    }
+    
     while (!response.jobCompleted()) {
       Thread.sleep(500L);
-      response = bigquery.getQueryResults(response.getJobId());
+      try {
+        response = bigquery.getQueryResults(response.getJobId());
+      } catch (BigQueryException e) {
+        throw new BQQException("Failed to grab query results", e);
+      }
     }
     
     List<BigQueryError> executionErrors = response.getExecutionErrors();

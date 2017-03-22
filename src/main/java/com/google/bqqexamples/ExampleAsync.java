@@ -1,11 +1,12 @@
-package com.google.BigQueryQueueDriverExamples;
+package com.google.bqqexamples;
 
-import com.google.BigQueryQueueDriver.BQQClient;
-import com.google.BigQueryQueueDriver.BQQException;
+import com.google.bqq.BQQClient;
+import com.google.bqq.BQQException;
 import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +25,13 @@ public class ExampleAsync {
     BQQClient c = new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
 
     // only allow at max 2 concurrent queries
-    c.startup(2);
+     try {
+      c.startup(2);
+      
+    // Catch errors involving bad service account path
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     
     // Queue up all my queries
     List<String> sqls = ExampleQueries.queries();
@@ -93,7 +100,7 @@ public class ExampleAsync {
        }
      }
     try {
-      c.teardown();
+      c.shutdown();
     } catch(Exception e) {
       System.out.println("Failed to teardown BQQClient threadpool");
       e.printStackTrace();

@@ -1,12 +1,12 @@
-package com.google.BigQueryQueueDriverExamples;
+package com.google.bqqexamples;
 
-import com.google.BigQueryQueueDriver.BQQClient;
-import com.google.BigQueryQueueDriver.BQQException;
+import com.google.bqq.BQQClient;
+import com.google.bqq.BQQException;
 import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -20,7 +20,13 @@ public class ExampleSync {
     
     // Startup 2 worker threads to handle bq queries, allowing only
     // 2 concurrent queries at any time.
-    c.startup(2);
+    try {
+      c.startup(2);
+      
+    // Catch errors involving bad service account path
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     // Run only 1 query at a time, and block thread until results are in
     List<String> sqls = ExampleQueries.queries();
@@ -78,7 +84,7 @@ public class ExampleSync {
     
     // Teardown BQ threadpool
     try {
-      c.teardown();
+      c.shutdown();
     } catch (Exception e) {
       // Handle exception in tearing down threadpool
       e.printStackTrace();
