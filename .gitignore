@@ -5,3 +5,4 @@
 build/
 gradle/
 bin/
+service_account.json
