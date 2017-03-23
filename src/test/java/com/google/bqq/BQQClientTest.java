@@ -7,13 +7,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.Assert;
 
+/**
+ * Tests BQQClient class.
+ */
 public class BQQClientTest {
-  private static String mExampleQuery = "SELECT COUNT(UNIQUE(word)) FROM [bigquery-public-data:samples.shakespeare]";
+  private static final String EXAMPLE_QUERY_SQL = "SELECT "
+      + "COUNT(UNIQUE(word)) "
+      + "FROM [bigquery-public-data:samples.shakespeare]";
   
   @Rule public ExpectedException thrown = ExpectedException.none();
 
@@ -30,7 +35,8 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testStartup_BadServiceAccountPath() throws FileNotFoundException, IOException {
+  public void testStartup_BadServiceAccountPath()
+      throws FileNotFoundException, IOException {
     BQQClient c = new BQQClient("some_bs_project", "some_bs_key.json");
     thrown.expect(FileNotFoundException.class);
     thrown.expectMessage("some_bs_key.json (No such file or directory)");
@@ -43,7 +49,7 @@ public class BQQClientTest {
     c.startup(1);
     
     for (int i = 0; i < 100; ++i) {
-      c.queueQuery(mExampleQuery, true);
+      c.queueQuery(EXAMPLE_QUERY_SQL, true);
     }
     
     Thread.sleep(5);
@@ -53,13 +59,15 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testQueueQuery_QueuesQuery() throws FileNotFoundException, IOException, InterruptedException, BQQException, ExecutionException {
+  public void testQueueQuery_QueuesQuery()
+      throws FileNotFoundException, IOException,
+      InterruptedException, BQQException, ExecutionException {
     BQQClient c = new BQQClient();
     c.startup(1);
     
-    Future<QueryResult> f1 = c.queueQuery(QueryRequest.newBuilder(mExampleQuery)
+    Future<QueryResult> f1 = c.queueQuery(QueryRequest.newBuilder(EXAMPLE_QUERY_SQL)
         .setUseLegacySql(true).build());
-    Future<QueryResult> f2 = c.queueQuery(mExampleQuery, true);
+    Future<QueryResult> f2 = c.queueQuery(EXAMPLE_QUERY_SQL, true);
     
     
     QueryResult r1 = BQQClient.getQueryResult(f1);
@@ -69,12 +77,14 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testGetQueryResult_PassesBQErrors_LegacySql() throws FileNotFoundException, IOException, InterruptedException, ExecutionException, BQQException {
+  public void testGetQueryResult_PassesBQErrors_LegacySql()
+      throws FileNotFoundException, IOException,
+      InterruptedException, ExecutionException, BQQException {
     BQQClient c = new BQQClient();
     c.startup(1);
     
     // this should be a failing query. mExampleQuery is legacy sql, 
-    Future<QueryResult> f = c.queueQuery(QueryRequest.newBuilder(mExampleQuery)
+    Future<QueryResult> f = c.queueQuery(QueryRequest.newBuilder(EXAMPLE_QUERY_SQL)
         .setUseLegacySql(false).build());
     
     thrown.expect(BQQException.class);
@@ -82,7 +92,9 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testGetQueryResult_PassesBQErrors_NoSQLQuery() throws FileNotFoundException, IOException, InterruptedException, BQQException, ExecutionException {
+  public void testGetQueryResult_PassesBQErrors_NoSQLQuery()
+      throws FileNotFoundException, IOException,
+      InterruptedException, BQQException, ExecutionException {
     BQQClient c = new BQQClient();
     c.startup(1);
     
@@ -94,7 +106,9 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testGetQueryResult_PassesBQErrors_MissingParameters() throws FileNotFoundException, IOException, InterruptedException, BQQException, ExecutionException {
+  public void testGetQueryResult_PassesBQErrors_MissingParameters()
+      throws FileNotFoundException, IOException,
+      InterruptedException, BQQException, ExecutionException {
     BQQClient c = new BQQClient();
     c.startup(1);
     
@@ -118,12 +132,15 @@ public class BQQClientTest {
   }
   
   @Test
-  public void testGetQueryResult_PassesBQErrors_ProjectNotFound() throws FileNotFoundException, IOException, InterruptedException, BQQException, ExecutionException {
+  public void testGetQueryResult_PassesBQErrors_ProjectNotFound()
+      throws FileNotFoundException, IOException,
+      InterruptedException, BQQException, ExecutionException {
     BQQClient c = new BQQClient();
     c.startup(1);
     
     // this should be a failing query, parameters not all set, missing corpus.
-    Future<QueryResult> f = c.queueQuery("SELECT count(*) FROM [some-bs-project:some.bstable]", true);
+    Future<QueryResult> f = c.queueQuery(
+        "SELECT count(*) FROM [some-bs-project:some.bstable]", true);
     
     thrown.expect(BQQException.class);
     BQQClient.getQueryResult(f);
@@ -136,7 +153,7 @@ public class BQQClientTest {
     
     // Schedule some tasks
     for (int i = 0; i < 10; ++i) {
-      c.queueQuery(mExampleQuery, true);
+      c.queueQuery(EXAMPLE_QUERY_SQL, true);
     }
     Thread.sleep(10);
     c.shutdown();

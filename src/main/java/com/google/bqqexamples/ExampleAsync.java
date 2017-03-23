@@ -14,8 +14,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * Example of queuing up lots of queries, then blocking until they all finish.
+ */
 public class ExampleAsync {
-
+  
+  /**
+   * run the example
+   */
   public static void run() {
     System.out.println("Asynchronous Query Execution");
 

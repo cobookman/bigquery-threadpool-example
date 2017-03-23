@@ -4,6 +4,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * Tests on BQQCallableBuilder class
+ */
 public class BQQCallableBuilderTest {
   @Rule public ExpectedException thrown = ExpectedException.none();
 

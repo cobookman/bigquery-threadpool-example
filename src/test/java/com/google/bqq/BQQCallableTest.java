@@ -10,16 +10,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * Tests on BQQCallable Class.
+ */
 public class BQQCallableTest {
-  private static String mExampleQuery = "SELECT COUNT(UNIQUE(word)) FROM [bigquery-public-data:samples.shakespeare]";
+  private static final String EXAMPLE_QUERY_SQL = "SELECT "
+      + "COUNT(UNIQUE(word)) "
+      + "FROM [bigquery-public-data:samples.shakespeare]";
 
   @Rule public ExpectedException thrown = ExpectedException.none();
 
   @Test
-  public void testCall_SuccessfullyRuns() throws FileNotFoundException, BQQException, InterruptedException, IOException {
+  public void testCall_SuccessfullyRuns()
+      throws FileNotFoundException, BQQException, InterruptedException, IOException {
     BQQCallable c = new BQQCallableBuilder()
       .setQueryRequest(QueryRequest
-          .newBuilder(mExampleQuery)
+          .newBuilder(EXAMPLE_QUERY_SQL)
           .setUseLegacySql(true)
           .build())
       .build();
@@ -30,7 +36,8 @@ public class BQQCallableTest {
   
   
   @Test
-  public void testCall_ThrowsException_EmptyQuery() throws FileNotFoundException, BQQException, InterruptedException, IOException {
+  public void testCall_ThrowsException_EmptyQuery()
+      throws FileNotFoundException, BQQException, InterruptedException, IOException {
     BQQCallable c = new BQQCallableBuilder()
         .setQueryRequest(QueryRequest
             .newBuilder("")
@@ -43,7 +50,8 @@ public class BQQCallableTest {
   }
   
   @Test
-  public void testCall_ThrowsException_BadQuery() throws FileNotFoundException, BQQException, InterruptedException, IOException {
+  public void testCall_ThrowsException_BadQuery()
+      throws FileNotFoundException, BQQException, InterruptedException, IOException {
     BQQCallable c = new BQQCallableBuilder()
         .setQueryRequest(QueryRequest
             .newBuilder("SELECT count(*) FROM [some-bs-project:some.bstable]")
@@ -56,7 +64,8 @@ public class BQQCallableTest {
   }
   
   @Test
-  public void testCall_ThrowsException_MissingParams() throws FileNotFoundException, BQQException, InterruptedException, IOException {
+  public void testCall_ThrowsException_MissingParams()
+      throws FileNotFoundException, BQQException, InterruptedException, IOException {
     int minWordCount = 10;
     String parameterizedSql = "SELECT word, word_count\n"
         + "FROM `bigquery-public-data.samples.shakespeare`\n"

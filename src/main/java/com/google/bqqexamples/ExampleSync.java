@@ -2,7 +2,6 @@ package com.google.bqqexamples;
 
 import com.google.bqq.BQQClient;
 import com.google.bqq.BQQException;
-import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
@@ -11,12 +10,21 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * Synchronous blocking example.
+ */
 public class ExampleSync {
+  
+  /**
+   * Run the example.
+   */
   public static void run() {
     System.out.println("Synchronous Query Execution");
     
     // Creating Client that uses projectId strong-moose and given service account
-    BQQClient c = new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
+    BQQClient c = new BQQClient(
+        "strong-moose",
+        "/usr/local/google/home/bookman/service_account.json");
     
     // Startup 2 worker threads to handle bq queries, allowing only
     // 2 concurrent queries at any time.

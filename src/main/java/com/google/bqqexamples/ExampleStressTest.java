@@ -14,48 +14,53 @@ import java.util.concurrent.Future;
  * Stress test to see N concurrent queries running at the same time
  */
 public class ExampleStressTest {
-  public static final int numberOfConcurrentQueries = 40;
-  public static final int numberOfQueriesToBeRun = 100;
+  public static final int NUMBER_OF_CONCURRENT_QUERIES = 40;
+  public static final int NUMBER_OF_TOTAL_QUERIES = 100;
   
 
-  public static final String popularGolangPackagesSQL = "SELECT\n" + 
-      "  REGEXP_EXTRACT(line, r'\"([^\"]+)\"') AS url, " + 
-      "  COUNT(*) AS count " + 
-      "FROM " + 
-      "  FLATTEN( ( " + 
-      "    SELECT " + 
-      "      SPLIT(SPLIT(REGEXP_EXTRACT(content, r'.*import\\s*[(]([^)]*)[)]'), '\\n'), ';') AS line," + 
-      "    FROM ( " + 
-      "      SELECT " + 
-      "        id, " + 
-      "        content " + 
-      "      FROM " + 
-      "        [bigquery-public-data:github_repos.sample_contents] " + 
-      "      WHERE " + 
-      "        REGEXP_MATCH(content, r'.*import\\s*[(][^)]*[)]')) AS C " + 
-      "    JOIN ( " + 
-      "      SELECT " + 
-      "        id " + 
-      "      FROM " + 
-      "        [bigquery-public-data:github_repos.sample_files] " + 
-      "      WHERE " + 
-      "        path LIKE '%.go' " + 
-      "      GROUP BY " + 
-      "        id) AS F " + 
-      "    ON " + 
-      "      C.id = F.id), line) " + 
-      "GROUP BY " + 
-      "  url " + 
-      "HAVING " + 
-      "  url IS NOT NULL " + 
-      "ORDER BY " + 
-      "  count DESC " + 
-      "LIMIT 10 ";
+  public static final String POPULAR_GOLANG_PACKAGES_SQL = "SELECT\n" 
+      + "  REGEXP_EXTRACT(line, r'\"([^\"]+)\"') AS url, "
+      + "  COUNT(*) AS count "
+      + "FROM "
+      + "  FLATTEN( ( "
+      + "    SELECT "
+      + "      SPLIT(SPLIT(REGEXP_EXTRACT("
+      + "          content, r'.*import\\s*[(]([^)]*)[)]'),"
+      + "          '\\n'), ';') AS line,"
+      + "    FROM ( "
+      + "      SELECT "
+      + "        id, "
+      + "        content "
+      + "      FROM "
+      + "        [bigquery-public-data:github_repos.sample_contents] "
+      + "      WHERE "
+      + "        REGEXP_MATCH(content, r'.*import\\s*[(][^)]*[)]')) AS C "
+      + "    JOIN ( "
+      + "      SELECT "
+      + "        id "
+      + "      FROM "
+      + "        [bigquery-public-data:github_repos.sample_files] "
+      + "      WHERE "
+      + "        path LIKE '%.go' "
+      + "      GROUP BY "
+      + "        id) AS F "
+      + "    ON "
+      + "      C.id = F.id), line) "
+      + "GROUP BY "
+      + "  url "
+      + "HAVING "
+      + "  url IS NOT NULL "
+      + "ORDER BY "
+      + "  count DESC " 
+      + "LIMIT 10 ";
     
+  /**
+   * Run the example.
+   */
   public static void run() {
     BQQClient c = new BQQClient();
     try {
-      c.startup(numberOfConcurrentQueries);
+      c.startup(NUMBER_OF_CONCURRENT_QUERIES);
     } catch (FileNotFoundException e) {
       // TODO(bookman): Auto-generated catch block
       e.printStackTrace();
@@ -65,8 +70,8 @@ public class ExampleStressTest {
     }
       
     ArrayList<Future<QueryResult>> futures = new ArrayList<>();
-    for (int i = 0; i < numberOfQueriesToBeRun; ++i) {
-      Future<QueryResult> f = c.queueQuery(QueryRequest.newBuilder(popularGolangPackagesSQL)
+    for (int i = 0; i < NUMBER_OF_TOTAL_QUERIES; ++i) {
+      Future<QueryResult> f = c.queueQuery(QueryRequest.newBuilder(POPULAR_GOLANG_PACKAGES_SQL)
           .setUseLegacySql(true)
           .setUseQueryCache(false)
           .build());
@@ -83,7 +88,7 @@ public class ExampleStressTest {
       }
       
       ArrayList<Future<QueryResult>> stillRunning = new ArrayList<>();
-      for(Future<QueryResult> future : futures) {        
+      for (Future<QueryResult> future : futures) {        
         if (!future.isDone()) {
           stillRunning.add(future);
           
