@@ -1,15 +1,11 @@
 /*
-  Copyright 2017 Google Inc.
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-      http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+ * Copyright 2017 Google Inc. Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may obtain a copy of the License
+ * at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in
+ * writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
 
 package com.google.bqqexamples;
 
@@ -31,7 +27,7 @@ import java.util.concurrent.Future;
  * Example of queuing up lots of queries, then blocking until they all finish.
  */
 public class ExampleAsync {
-  
+
   /**
    * run the example
    */
@@ -40,23 +36,24 @@ public class ExampleAsync {
 
 
     // Creating Client that uses projectId strong-moose and given service account
-    BQQClient c =
+    BQQClient bqqClient =
         new BQQClient("strong-moose", "/usr/local/google/home/bookman/service_account.json");
 
     // only allow at max 2 concurrent queries
     try {
-      c.startup(2);
+      bqqClient.startup(2);
 
       // Catch errors involving bad service account path
     } catch (IOException e) {
       e.printStackTrace();
+      System.exit(1);
     }
 
     // Queue up all my queries
     List<String> sqls = ExampleQueries.queries();
     HashMap<String, Future<QueryResult>> map = new HashMap<String, Future<QueryResult>>();
     for (String sql : sqls) {
-      map.put(sql, c.queueQuery(sql, true));
+      map.put(sql, bqqClient.queueQuery(sql, true));
     }
 
     // Queue up parameterized query
@@ -70,11 +67,11 @@ public class ExampleAsync {
         .addNamedParameter("corpus", QueryParameterValue.string(corpus))
         .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
         .setUseLegacySql(false).build();
-    map.put(parameterizedSql, c.queueQuery(parameterizedQueryRequest));
+    map.put(parameterizedSql, bqqClient.queueQuery(parameterizedQueryRequest));
 
     // Block until all queries are done, and output info once a query has results
     while (!map.isEmpty()) {
-      System.out.println("\tNumber of queued up jobs: " + c.getNumJobs());
+      System.out.println("\tNumber of queued up jobs: " + bqqClient.getNumJobs());
       try {
         Thread.sleep(500);
       } catch (InterruptedException e1) {
@@ -114,7 +111,7 @@ public class ExampleAsync {
     }
 
     try {
-      c.shutdown();
+      bqqClient.shutdown();
     } catch (Exception e) {
       System.out.println("Failed to teardown BQQClient threadpool");
       e.printStackTrace();

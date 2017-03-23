@@ -34,25 +34,24 @@ public class ExampleSync {
   public static void run() {
     System.out.println("Synchronous Query Execution");
     
-    // Creating Client that uses projectId strong-moose and given service account
-    BQQClient c = new BQQClient(
-        "strong-moose",
-        "/usr/local/google/home/bookman/service_account.json");
+    BQQClient bqqClient = new BQQClient();
     
     // Startup 2 worker threads to handle bq queries, allowing only
     // 2 concurrent queries at any time.
     try {
-      c.startup(2);
+      bqqClient.startup(2);
       
     // Catch errors involving bad service account path
     } catch (IOException e) {
       e.printStackTrace();
+      System.exit(1);
     }
 
     // Run only 1 query at a time, and block thread until results are in
     List<String> sqls = ExampleQueries.queries();
     for (String sql : sqls) {
-      Future<QueryResult> queryFuture = c.queueQuery(sql, true);
+      Future<QueryResult> queryFuture = bqqClient.queueQuery(sql, true);
+      
       try {
         QueryResult response = BQQClient.getQueryResult(queryFuture);
         assert(response.getTotalRows() > 0);
@@ -88,7 +87,7 @@ public class ExampleSync {
         .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
         .setUseLegacySql(false)
         .build();
-    Future<QueryResult> userInputQueryResponse = c.queueQuery(parameterizedQueryRequest);
+    Future<QueryResult> userInputQueryResponse = bqqClient.queueQuery(parameterizedQueryRequest);
     
     try {
       // Block and wait until future resolves
@@ -109,15 +108,10 @@ public class ExampleSync {
     
     // Teardown BQ threadpool
     try {
-      c.shutdown();
+      bqqClient.shutdown();
+      
     } catch (Exception e) {
       // Handle exception in tearing down threadpool
-      e.printStackTrace();
-    }
-    
-    try {
-      c.shutdown();
-    } catch (Exception e) {
       e.printStackTrace();
     }
   }

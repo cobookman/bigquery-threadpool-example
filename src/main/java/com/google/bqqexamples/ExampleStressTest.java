@@ -17,7 +17,6 @@ import com.google.bqq.BQQClient;
 import com.google.bqq.BQQException;
 import com.google.cloud.bigquery.QueryRequest;
 import com.google.cloud.bigquery.QueryResult;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
@@ -70,20 +69,18 @@ public class ExampleStressTest {
    * Run the example.
    */
   public static void run() {
-    BQQClient c = new BQQClient();
+    BQQClient bqqClient = new BQQClient();
     try {
-      c.startup(NUMBER_OF_CONCURRENT_QUERIES);
-    } catch (FileNotFoundException e) {
-      // TODO(bookman): Auto-generated catch block
+      bqqClient.startup(NUMBER_OF_CONCURRENT_QUERIES);
+      
+    } catch (IOException e) {
       e.printStackTrace();
-    } catch (IOException e1) {
-      // TODO(bookman): Auto-generated catch block
-      e1.printStackTrace();
+      System.exit(1);
     }
       
     ArrayList<Future<QueryResult>> futures = new ArrayList<>();
     for (int i = 0; i < NUMBER_OF_TOTAL_QUERIES; ++i) {
-      Future<QueryResult> f = c.queueQuery(QueryRequest.newBuilder(POPULAR_GOLANG_PACKAGES_SQL)
+      Future<QueryResult> f = bqqClient.queueQuery(QueryRequest.newBuilder(POPULAR_GOLANG_PACKAGES_SQL)
           .setUseLegacySql(true)
           .setUseQueryCache(false)
           .build());

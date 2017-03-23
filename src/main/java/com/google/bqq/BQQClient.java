@@ -66,7 +66,7 @@ public class BQQClient {
   public void startup(int numThreads) throws FileNotFoundException, IOException {   
     // Sanity check that our credentials are valid by creating a BQ client connection
     BQQServiceFactory.buildClient(mProjectId, mServiceAccountPath);
-
+ 
     // FIFO Queue
     BlockingQueue<Runnable> blockingQueue = new LinkedBlockingQueue<Runnable>();
     
@@ -123,7 +123,6 @@ public class BQQClient {
       result = queryResultFuture.get();
 
     } catch (ExecutionException e) { 
-      
       Throwable t = e.getCause();
       if (t instanceof BQQException) {
         throw ((BQQException) t);
