@@ -34,7 +34,7 @@ Example Applications
 How to Use
 --------------------
 
-## Creating a Client:
+# Creating a Client:
 
 ### Using a service account
 
@@ -109,7 +109,7 @@ QueryRequest queryRequest = QueryRequest.newBuilder(parameterizedSql)
     .build();
 ```
 
-## Queining a Query
+## Queuing a Query
 
 All Queries that are queued return a [Future](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Future.html). This allows you to do work while you wait for the response.
 
