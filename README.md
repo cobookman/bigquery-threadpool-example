@@ -31,10 +31,9 @@ Example Applications
   Queues up many queries, and many worker threads to stress test this library. In this example there's 100 BQ Queries and 40 concurrent workers.
 
 
-How to Use
---------------------
+# How to Use
 
-# Creating a Client:
+## Creating a Client:
 
 ### Using a service account
 
