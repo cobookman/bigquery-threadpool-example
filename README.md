@@ -1,6 +1,9 @@
 BigQuery ThreadPoolExecutor Example Code
 ==========================
 
+[![Build
+Status](https://api.travis-ci.org/cobookman/bigquery-threadpool-example.svg?branch=master)](https://travis-ci.org/cobookman/bigquery-threadpool-example)
+
 Example code on using a ThreadPoolExecutor to have a First in First Out Queue of Queries
 which are handled by N worker threads.
 
