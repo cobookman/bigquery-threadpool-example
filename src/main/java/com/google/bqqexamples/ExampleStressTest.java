@@ -16,9 +16,8 @@ import java.util.concurrent.Future;
 public class ExampleStressTest {
   public static final int NUMBER_OF_CONCURRENT_QUERIES = 40;
   public static final int NUMBER_OF_TOTAL_QUERIES = 100;
-  
 
-  public static final String POPULAR_GOLANG_PACKAGES_SQL = "SELECT\n" 
+  public static final String POPULAR_GOLANG_PACKAGES_SQL = "SELECT " 
       + "  REGEXP_EXTRACT(line, r'\"([^\"]+)\"') AS url, "
       + "  COUNT(*) AS count "
       + "FROM "

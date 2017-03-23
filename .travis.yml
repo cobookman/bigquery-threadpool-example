@@ -12,6 +12,7 @@ before_install:
   - curl https://sdk.cloud.google.com | bash
   - ~/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service_account.json
   - ~/google-cloud-sdk/bin/gcloud config set project $(cat service_account.json | jq '.project_id' | tr -d "\"")
+  - export GOOGLE_APPLICATION_CREDENTIALS="$TRAVIS_BUILD_DIR/service_account.json"
 
 script: gradle test --info
 

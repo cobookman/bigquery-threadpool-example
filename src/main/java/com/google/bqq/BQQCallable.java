@@ -19,7 +19,6 @@ public class BQQCallable implements Callable<QueryResult> {
   private String mServiceAccountPath = "";
   private QueryRequest mQueryRequest;
 
-    
   /**
    * Generates a new BQQCallable instance
    * If serviceAccountPath is an empty string / null, then default credentials used instead.
@@ -27,13 +26,13 @@ public class BQQCallable implements Callable<QueryResult> {
    * @param serviceAccountPath absolute path to a service account, or null/"" for default creds.
    * @param queryRequest the Query that needs to be run
    */
-  public BQQCallable(String projectId, String serviceAccountPath, 
+  public BQQCallable(String projectId, String serviceAccountPath,
       QueryRequest queryRequest) {
     mProjectId = projectId;
     mServiceAccountPath = serviceAccountPath;
     mQueryRequest = queryRequest;
   }
-  
+
   /**
    * Executes the instance's BigQuery SQL Query.
    * @throws BQQException query fails
@@ -44,7 +43,7 @@ public class BQQCallable implements Callable<QueryResult> {
   @Override
   public QueryResult call() throws BQQException, InterruptedException,
     FileNotFoundException, IOException {
-    
+
     BigQuery bigquery = BQQServiceFactory.buildClient(mProjectId, mServiceAccountPath);
     QueryResponse response;
     try {
@@ -58,15 +57,15 @@ public class BQQCallable implements Callable<QueryResult> {
       try {
         response = bigquery.getQueryResults(response.getJobId());
       } catch (BigQueryException e) {
-        throw new BQQException("Failed to grab query results", e);
+        throw new BQQException("Failed to grab query results" + e, e);
       }
     }
-    
+
     List<BigQueryError> executionErrors = response.getExecutionErrors();
     if (!executionErrors.isEmpty()) {
       throw new BQQException("BigQueryError", executionErrors);
     }
-    
+
     QueryResult result = response.getResult();
     return result;
   }
