@@ -2,7 +2,6 @@ language: java
 jdk:
   - oraclejdk8
   - oraclejdk7
-  - openjdk8
   - openjdk7
 
 os:
@@ -12,6 +11,7 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_556c59e13c24_key -iv $encrypted_556c59e13c24_iv -in service_account.json.enc -out service_account.json -d
   - curl https://sdk.cloud.google.com | bash
   - ~/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service_account.json
+  - ~/google-cloud-sdk/bin/gcloud config set project $(cat service_account.json | jq '.project_id' | tr -d "\"")
 
 script: gradle test --info
 
