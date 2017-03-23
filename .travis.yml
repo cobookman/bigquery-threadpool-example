@@ -8,6 +8,11 @@ jdk:
 os:
   - linux
 
+before_install:
+  - openssl aes-256-cbc -K $encrypted_556c59e13c24_key -iv $encrypted_556c59e13c24_iv -in service_account.json.enc -out service_account.json -d
+  - curl https://sdk.cloud.google.com | bash
+  - ~/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service_account.json
+
 env:
   global:
     - CLOUDSDK_CORE_DISABLE_PROMPTS: 1
