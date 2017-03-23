@@ -7,7 +7,10 @@ Status](https://api.travis-ci.org/cobookman/bigquery-threadpool-example.svg?bran
 Example code on using a ThreadPoolExecutor to have a First in First Out Queue of Queries
 which are handled by N worker threads.
 
-This is not an official Google product.
+This is not an official Google product. This is not covered by Google Support,
+and comes with no SLA / Warrenty. Its been provided as an example / starting
+point for limiting the number of concurrent BigQuery Queries through use of a
+ThreadPool & FIFO Queue.
 
 Quickstart
 ----------
