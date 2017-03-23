@@ -104,7 +104,7 @@ String parameterizedSql = "SELECT word, word_count "
     + "WHERE corpus = @corpus "
     + "AND word_count >= @min_word_count "
     + "ORDER BY word_count DESC";
-    
+
 QueryRequest queryRequest = QueryRequest.newBuilder(parameterizedSql)
     .addNamedParameter("corpus", QueryParameterValue.string(corpus))
     .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
@@ -259,11 +259,10 @@ while (it.hasNext() && maxRows-- > 0) {
 
 /**
  * Do more work
-  */
+ */
 
 c.shutdown();
 ```
-
 
 # Example Code
 
@@ -279,7 +278,8 @@ c.shutdown();
   * This example spins up 40 concurrent workers, and queues up 100 queries. It
     then blocks until its done. Testing that the code can indeed handle this
     kind of query volume, and allowing you to profile how many workers you'd
-    want for a given query kind.
+    want for a given query kind. Warning this example when run can incur
+    significant billing.
 
 
 # Building & Running Samples
@@ -290,7 +290,7 @@ To run the test suite simply run from the root folder:
 $ gradle test --info
 ```
 
-To run the samples:
+To run the samples (Warning can incur significant billing):
 
 ```bash
 $ gradle run --info
