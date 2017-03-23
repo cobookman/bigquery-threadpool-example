@@ -178,15 +178,15 @@ In this case there is a missing parameter in the query.
 ```java
 BQQClient c = new BQQClient();
 c.startup(1);
-    
+
 // this should be a failing query, parameters not all set, missing corpus.
 int minWordCount = 10;
 String parameterizedSql = "SELECT word, word_count\n"
-    + "FROM `bigquery-public-data.samples.shakespeare`\n"
+    + "FROM \`bigquery-public-data.samples.shakespeare\`\n"
     + "WHERE corpus = @corpus\n"
     + "AND word_count >= @min_word_count\n"
     + "ORDER BY word_count DESC";
-    
+
 QueryRequest parameterizedQueryRequest = QueryRequest
     .newBuilder(parameterizedSql)
 
@@ -196,11 +196,11 @@ QueryRequest parameterizedQueryRequest = QueryRequest
     .build();
 
 Future<QueryResult> f = c.queueQuery(parameterizedQueryRequest);
-    
+
 try {
     BQQClient.getQueryResult(f);
 } catch (BQQException e) {
-    for (BigQueryError be : errs.getBQErrors()) {
+for (BigQueryError be : errs.getBQErrors()) {
         if (be.getReason().contains("invalidQuery")) {
             ...
         } else if (be.getReason().contains("quotaExceeded")) {
@@ -225,11 +225,11 @@ c.startup(10);
 int minWordCount = 10;
 String corpus = "tempest";
 String parameterizedSql = "SELECT word, word_count "
-    + "FROM `bigquery-public-data.samples.shakespeare` "
+    + "FROM \`bigquery-public-data.samples.shakespeare\` "
     + "WHERE corpus = @corpus "
     + "AND word_count >= @min_word_count "
     + "ORDER BY word_count DESC";
-    
+
 QueryRequest queryRequest1 = QueryRequest.newBuilder(parameterizedSql)
     .addNamedParameter("corpus", QueryParameterValue.string(corpus))
     .addNamedParameter("min_word_count", QueryParameterValue.int64(minWordCount))
@@ -260,4 +260,36 @@ while (it.hasNext() && maxRows-- > 0) {
   */
 
 c.shutdown();
+```
+
+
+# Example Code
+
+* [Example
+  Async](https://github.com/cobookman/bigquery-threadpool-example/blob/master/src/main/java/com/google/bqqexamples/ExampleAsync.java)
+  * This example queues up a bunch of queries, and then pulls the query results
+    as they come in
+* [Example
+  Sync](https://github.com/cobookman/bigquery-threadpool-example/blob/master/src/main/java/com/google/bqqexamples/ExampleSync.java)
+  * This example queues up a query, then blocks until it finishes.
+* [Example Stress
+  Test](https://github.com/cobookman/bigquery-threadpool-example/blob/master/src/main/java/com/google/bqqexamples/ExampleStressTest.java)
+  * This example spins up 40 concurrent workers, and queues up 100 queries. It
+    then blocks until its done. Testing that the code can indeed handle this
+    kind of query volume, and allowing you to profile how many workers you'd
+    want for a given query kind.
+
+
+# Building & Running Samples
+
+To run the test suite simply run from the root folder:
+
+```bash
+$ gradle test --info
+```
+
+To run the samples:
+
+```bash
+$ gradle run --info
 ```
