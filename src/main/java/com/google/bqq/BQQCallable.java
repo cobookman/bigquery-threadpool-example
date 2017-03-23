@@ -50,9 +50,9 @@ public class BQQCallable implements Callable<QueryResult> {
     try {
       response = bigquery.query(mQueryRequest);
     } catch (BigQueryException e) {
-      throw new BQQException("Query failed to be sent: " + mQueryRequest, e);
+      throw new BQQException(e);
     }
-    
+
     while (!response.jobCompleted()) {
       Thread.sleep(500L);
       try {
