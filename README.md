@@ -41,7 +41,8 @@ Example Applications
 ### Using a service account
 
 Both a project Id and absolute path to a service account need to be provided
-```
+
+```java
 BQQClient c = new BQQClient("my-awesome-project", "/home/bookman/service_account.json");
 ```
 
@@ -54,7 +55,7 @@ service account to run against the same project Id that the gcloud utility is ru
 
 To setup the client simply run:
 
-```
+```java
 BQQClient c = new BQQClient();
 ```
 
@@ -68,7 +69,7 @@ default credentials will be used instead.
 
 Here is an example of us Starting up a Client with a maximum of 40 concurrent queries.
 
-```
+```java
 BQQClient c = new BQQClient();
 try {
     c.startup(numberOfConcurrentQueries);
@@ -84,7 +85,7 @@ The BigQuery SDK has a class called [QueryRequest](http://googlecloudplatform.gi
 
 These QueryRequest objects can be build using the QueryRequest factory method as shown below:
 
-```
+```java
 QueryRequest queryRequest = QueryRequest.newBuilder("SELECT * FROM [bigquery-public-data:samples.shakespeare]")
     .setUseLegacySql(true)
     .setUseQueryCache(true)
@@ -95,7 +96,7 @@ QueryRequest queryRequest = QueryRequest.newBuilder("SELECT * FROM [bigquery-pub
 You can use this class to build [Parameterized Queries](https://cloud.google.com/bigquery/querying-data#running_parameterized_queries),
 which prevent SQL injections:
 
-```
+```java
 int minWordCount = 10;
 String corpus = "tempest";
 String parameterizedSql = "SELECT word, word_count "
@@ -118,7 +119,8 @@ All Queries that are queued return a [Future](https://docs.oracle.com/javase/7/d
 ### Using a QueryRequest
 
 Here's how to queue up a QueryRequest. The Returned
-```
+
+```java
 QueryRequest queryRequest = QueryRequest.newBuilder("SELECT * FROM [bigquery-public-data:samples.shakespeare]")
     .setUseLegacySql(true)
     .build()
@@ -127,7 +129,7 @@ Future<QueryResult> queryResultFuture = c.queue(queryRequest);
 ```
 
 ### Using a SQL Statement String
- 
+
 If you just want to queue up a SQL statement and you are ok with the default QueryRequest options,
 then you can...
 
@@ -181,10 +183,10 @@ c.startup(1);
 
 // this should be a failing query, parameters not all set, missing corpus.
 int minWordCount = 10;
-String parameterizedSql = "SELECT word, word_count\n"
-    + "FROM \`bigquery-public-data.samples.shakespeare\`\n"
-    + "WHERE corpus = @corpus\n"
-    + "AND word_count >= @min_word_count\n"
+String parameterizedSql = "SELECT word, word_count "
+    + "FROM `bigquery-public-data.samples.shakespeare` "
+    + "WHERE corpus = @corpus "
+    + "AND word_count >= @min_word_count "
     + "ORDER BY word_count DESC";
 
 QueryRequest parameterizedQueryRequest = QueryRequest
@@ -225,7 +227,7 @@ c.startup(10);
 int minWordCount = 10;
 String corpus = "tempest";
 String parameterizedSql = "SELECT word, word_count "
-    + "FROM \`bigquery-public-data.samples.shakespeare\` "
+    + "FROM `bigquery-public-data.samples.shakespeare` "
     + "WHERE corpus = @corpus "
     + "AND word_count >= @min_word_count "
     + "ORDER BY word_count DESC";
