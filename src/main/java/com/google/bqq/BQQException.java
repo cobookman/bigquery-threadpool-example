@@ -21,7 +21,7 @@ public class BQQException extends Exception {
   }
     
   public BQQException(String message, BigQueryError bqError) {
-    super(message);
+    super(message + "\n" + bqError.toString());
     mBQErrors = new ArrayList<>();
     mBQErrors.add(bqError);
   }
@@ -33,7 +33,7 @@ public class BQQException extends Exception {
   }
   
   public BQQException(String message, BigQueryException bqError) {
-    super(message);
+    super(message, bqError);
     mBQErrors = new ArrayList<>();
     mBQErrors.add(bqError.getError());
   }
@@ -43,12 +43,12 @@ public class BQQException extends Exception {
     mBQErrors = new ArrayList<>();
     mBQErrors.add(bqError.getError());
   }
-  
+
   public BQQException(String message, List<BigQueryError> bqErrors) {
-    super(message);
+    super(message + "\n" + bqErrors.toString());
     mBQErrors = bqErrors;
   }
-  
+
   public List<BigQueryError> getBQErrors() {
     return mBQErrors;
   }
