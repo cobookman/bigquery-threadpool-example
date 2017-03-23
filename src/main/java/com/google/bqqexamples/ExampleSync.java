@@ -93,5 +93,11 @@ public class ExampleSync {
       // Handle exception in tearing down threadpool
       e.printStackTrace();
     }
+    
+    try {
+      c.shutdown();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

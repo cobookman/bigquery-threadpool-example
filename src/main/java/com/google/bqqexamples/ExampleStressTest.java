@@ -56,9 +56,9 @@ public class ExampleStressTest {
     BQQClient c = new BQQClient();
     try {
       c.startup(numberOfConcurrentQueries);
-    } catch (FileNotFoundException e1) {
+    } catch (FileNotFoundException e) {
       // TODO(bookman): Auto-generated catch block
-      e1.printStackTrace();
+      e.printStackTrace();
     } catch (IOException e1) {
       // TODO(bookman): Auto-generated catch block
       e1.printStackTrace();

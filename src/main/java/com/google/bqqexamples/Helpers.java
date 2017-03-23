@@ -12,11 +12,12 @@ public class Helpers {
   public static final String ANSI_RED = "\u001B[31m";
 
   public static void printRows(QueryResult response) {
-    Iterator<List<FieldValue>> rowIterator = response.iterateAll();
+    Iterator<List<FieldValue>> iter = response.iterateAll();
     System.out.println("First 100 Rows");
     int maxRows = 100;
-    while (rowIterator.hasNext() && maxRows-- > 0) {
-      System.out.println(rowIterator.next());
+    while (iter.hasNext() && maxRows-- > 0) {
+      List<FieldValue> row = iter.next();
+      System.out.println(row);
     }
   }
   
