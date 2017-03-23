@@ -13,6 +13,8 @@ before_install:
   - curl https://sdk.cloud.google.com | bash
   - ~/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=service_account.json
 
+script: gradle test --info
+
 env:
   global:
     - CLOUDSDK_CORE_DISABLE_PROMPTS: 1
